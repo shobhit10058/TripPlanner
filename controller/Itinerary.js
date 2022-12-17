@@ -1,5 +1,5 @@
 const Itinerary = require('../models/Itinerary');
-const User = require('../models/user');
+const User = require('../models/User');
 const Trip = require('../models/Trip');
 
 module.exports = {

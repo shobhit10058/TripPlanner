@@ -1,4 +1,4 @@
-const User = require('../models/user');
+const User = require('../models/User');
 const Trip = require('../models/Trip');
 const Itinerary = require('../models/Itinerary');
 const { hashPassword, verifyPassword } = require('../utilities/managePasswords')
