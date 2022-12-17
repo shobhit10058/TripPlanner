@@ -8,4 +8,4 @@ router.put('/:id', updateTrip)
 router.delete('/:id', deleteTrip)
 router.get("/search", searchTrip)
 
-export default router
+module.exports = router

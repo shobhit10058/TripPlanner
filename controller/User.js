@@ -38,5 +38,14 @@ module.exports = {
 			res.status(500).json({ message: "server error occurred" })
 		}
 	},
-	
+	getAllItinerary: async (req, res) => {
+		try {
+			const { userID } = req.body;
+			const userObj = await User.findById(userID);
+			await userObj.populate('itineraries');
+			res.status(200).json({itineraries: userObj.itineraries});
+		} catch (e) {
+			res.status(400).json({message: "could not get itineraries"});
+		}
+	}
 }

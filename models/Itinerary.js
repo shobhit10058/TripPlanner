@@ -3,7 +3,7 @@ const mongoose = require('mongoose')
 const Itinerary = mongoose.Schema({
 	usersRef: [{
 		type: mongoose.SchemaTypes.ObjectId,
-		ref: User
+		ref: 'User'
 	}],
 	dayWisePlan: {
 		type: [Array],
@@ -11,7 +11,7 @@ const Itinerary = mongoose.Schema({
 	},
 	tripRef: {
 		type: mongoose.SchemaTypes.ObjectId,
-		ref: Trip
+		ref: 'Trip'
 	}
 }) 
 
