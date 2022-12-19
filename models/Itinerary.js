@@ -1,11 +1,11 @@
 const mongoose = require('mongoose')
 
-const Itinerary = mongoose.Schema({
+const Itinerary = new mongoose.Schema({
 	usersRef: [{
 		type: mongoose.SchemaTypes.ObjectId,
 		ref: 'User'
 	}],
-	dayWisePlan: {
+	activities: {
 		type: [Array],
 		default: []
 	},

@@ -10,11 +10,11 @@ module.exports = {
 		if (!tripID)
 			return res.status(400).json({ message: "request format improper" });
 
-		const tripObj = Trip.findById(tripID);
-		const userObj = User.findById(userID);
+		const tripObj = await Trip.findById(tripID);
+		const userObj = await User.findById(userID);
 
-		let activities = [["time", "activity"]];
-		for (let iterator = 1; iterator < tripObj.duration; iterator += 1)
+		let activities = [];
+		for (let iterator = 0; iterator < tripObj.duration; iterator += 1)
 			activities.push([["time", "activity"]]);
 
 		if (tripObj && userObj) {
@@ -28,7 +28,7 @@ module.exports = {
 			await userObj.save();
 			tripObj.itineraries.push(ItineraryObj.id);
 			await tripObj.save();
-			return res.status(200).json({ message: "Itinerary created" });
+			return res.status(200).json({ itinerary: ItineraryObj, message: "Itinerary created" });
 		}
 		return res.status(400).json({ message: "Itinerary not created" });
 	},
@@ -42,27 +42,27 @@ module.exports = {
 		if (!id || !userID || !day || !time || !activity, !operation)
 			return res.status(400).json({ message: "request format improper" });
 
-		const itineraryObj = Itinerary.findById(id);
+		const itineraryObj = await Itinerary.findById(id);
 		const userObj = await User.findById(userID);
-		let found = userObj.itineraries.find((itineraryID) => itineraryID === id);
+		let found = userObj.itineraries.find((itineraryID) => itineraryID.toString() === id);
 		if (!found) {
 			return res.status(401).json({ message: "User not authorized to modify this itinerary" });
 		}
-		itineraryObj.populate("tripRef");
+		await itineraryObj.populate("tripRef");
 
-		found = itineraryObj.activities.find((currActivity) => currActivity === activity);
+		found = itineraryObj.tripRef.activities.find((currActivity) => currActivity === activity);
 		if (!found)
 			return res.status(400).json({ message: "activity not present in trip" });
 
 		if (operation == "add") {
-			itineraryObj.activities[day].push([time, activity]);
+			itineraryObj.activities[day] = [...itineraryObj.activities[day], [time, activity]];
 		} else if (operation == "remove") {
 			itineraryObj.activities[day] = itineraryObj.activities[day].filter((time_activity) => {
 				return (!(time_activity[0] === time) || !(time_activity[1] === activity));
 			})
 		}
 		await itineraryObj.save();
-		return res.status(200).json({ message: "Itinerary updated" });
+		return res.status(200).json({ itinerary: itineraryObj, message: "Itinerary updated" });
 	},
 	getIteraryByID: async (req, res) => {
 		try {
@@ -105,14 +105,17 @@ module.exports = {
 			const { userID, targetUsername } = req.body;
 			const sharer = await User.findById(userID);
 			const receiver = await User.find({ username: targetUsername });
+			console.log({receiver, sharer})
 			const itineraryObj = await Itinerary.findById(id);
-			const found = sharer.itineraries.find((itineraryID) => itineraryID === id);
+			const found = sharer.itineraries.find((itineraryID) => itineraryID.toString() === id);
 			if (!found) {
 				return res.status(401).json({ message: "User not authorized to share this itinerary" });
 			}
 			receiver.itineraries.push(id);
 			itineraryObj.usersRef.push(receiver.id);
-			return res.status(200).json({ message: "Itinerary shared" });
+			await receiver.save();
+			await itineraryObj.save();
+			return res.status(200).json({ itinerary: itineraryObj, message: "Itinerary shared" });
 		} catch (e) {
 			return res.status(400).json({ message: "Itinerary not shared", error: e })
 		}

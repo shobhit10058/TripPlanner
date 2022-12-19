@@ -56,14 +56,10 @@ module.exports = {
 		});
 	},
 	searchTrip: 
-	(req, res) => {
-		const query = req.query;
-		Trip.find(query, (error, trips) => {
-		  if (error) {
-			res.json({error});
-		  } else {
-			res.json({trips});
-		  }
-		});
+	async (req, res) => {
+		const query = req.body;
+		const trips = await Trip.find(query).select("-itineraries -_id");
+		console.log(trips);
+		res.send({trips});
 	}
 }
